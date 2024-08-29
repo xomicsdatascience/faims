@@ -241,35 +241,3 @@ def add_peptide_to_session(id_peptides: str):
     session["id_peptides"].append(id_peptides)
     session.modified = True
     return
-
-
-@bp.route("/showjob/")
-def show_jobs():
-    print(session["id_peptides"])
-    return f"""
-    <!doctype HTML>
-    {session["id_peptides"]}\n
-    """
-
-@bp.route("/deljob/")
-def deljob():
-    db = get_db()
-    for id_peptides in session["id_peptides"]:
-        db.execute("DELETE FROM queue WHERE id_peptides = ?", (id_peptides,))
-    db.commit()
-    session["id_peptides"] = []
-    return
-
-
-@bp.route("/job/<id_peptides>")
-def add_job(id_peptides):
-    session.modified = True
-    session.permanent = True
-    if "id_peptides" not in session.keys():
-        session["id_peptides"] = []
-    db = get_db()
-    db.execute("INSERT INTO queue (id_peptides, status) VALUES (?,?,?)", (id_peptides, id_peptides, "queued"))
-    db.commit()
-    session["id_job"].append(id_job)
-    print(session["id_job"])
-    return redirect(url_for("landing.index"))
