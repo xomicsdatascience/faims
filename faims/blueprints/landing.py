@@ -12,8 +12,6 @@ import tempfile
 
 bp = Blueprint("landing", __name__, url_prefix="/")
 
-# session.modified = True
-#         session.permanent = True
 
 @bp.route("/", methods=["GET", "POST"])
 def index():
@@ -83,7 +81,6 @@ def download_file(id_peptides):
         pred_labels_file = out_prefix + "_prediction_labels"
 
         tmp_name = tempfile.mkstemp(suffix=".zip")[-1]
-         # Zip the two files together (makes the total size larger, so meh)
         z = zipfile.ZipFile(tmp_name, "w", compression=zipfile.ZIP_STORED)
         z.write(pred_file, arcname="predictions.npy")
         z.write(pred_labels_file, arcname="prediction_labels.txt")
@@ -241,3 +238,7 @@ def add_peptide_to_session(id_peptides: str):
     session["id_peptides"].append(id_peptides)
     session.modified = True
     return
+
+@bp.route("/about", methods=["GET"])
+def about():
+    return render_template("about.html")
