@@ -1,0 +1,27 @@
+<!doctype html>
+
+<title>{% block title %}FAIMS CV{% endblock %}</title>
+
+<link rel="stylesheet" href="{{ url_for("static", filename="style.css") }}">
+
+<nav>
+    <h1>FAIMS</h1>
+    <ul>
+        About
+    </ul>
+</nav>
+
+<section class="content">
+    <header>
+        {% block header %}{% endblock %}
+    </header>
+    <body>
+        <div class="flex-container" style="margin-right: 0;">
+            <div class="main-content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+
+    </body>
+</section>

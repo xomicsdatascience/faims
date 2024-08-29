@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block header %}
+    {% block title %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+    <p>Lorem ipsum: Peptide ion mobility adds an extra dimension of separation to mass spectrometry-based proteomics. The ability to accurately predict peptide ion mobility would be useful to expedite assay development and to discriminate true answers in database search. There are methods to accurately predict peptide ion mobility through drift tube devices, but methods to predict mobility through high-field asymmetric waveform ion mobility (FAIMS) are underexplored. Here, we successfully model peptide ions’ FAIMS mobility using a multi-label multi-output classification scheme to account for non-normal transmission distributions. We trained two models from over 100,000 human peptide precursors: a random forest and a long-term short-term memory (LSTM) neural network. Both models had different strengths, and the ensemble average of model predictions produced higher F2 score than either model alone. Finally, we explore cases where the models make mistakes, and demonstrate predictive performance of F2=0.66 (AUROC=0.928) on a new test dataset of nearly 40,000 different E. coli peptide ions.</p>
+
+
+    <label for="btn_upload">Upload list of proteins:</label>
+    <input id="file_peptides" type="file">
+
+    <form id="submission_form" method="POST" enctype="multipart/form-data">
+        <label for="job_name">Name for the job:</label>
+        <input id="job_name" name="job_name" placeholder="Name to use for later reference."
+        <label for="peptides">List of peptides:</label>
+        <textarea name="peptides" id="peptides" placeholder="Newline-separated list of proteins"></textarea>
+        <input id="btn_submit" type="submit" value="Submit">
+    </form>
+
+    {% if jobs is defined %}
+        {%  if jobs["completed"] is defined %}
+            <h3>Completed jobs:</h3>
+            {% for jobs_c in jobs["completed"] %}
+                <p>{{ jobs_c["job_name"] }} - {{ jobs_c["creation_time"] }} - <a href="/results/{{ jobs_c['id_peptides'] }}">Download</a></p>
+
+            {% endfor %}
+        {% endif %}
+        {% if jobs["running"] is defined and jobs["running"] | length > 0%}
+            <h3>Running:</h3>
+            {% for jobs_r in jobs["running"] %}
+                <p>{{ jobs_r["job_name"] }} - {{ jobs_r["creation_time"] }}</p>
+            {% endfor %}
+        {% endif %}
+
+        {% if jobs["queued"] is defined and jobs["queued"] | length > 0%}
+            <h3>Queued:</h3>
+            {% for jobs_q in jobs["queued"] %}
+                <p>{{ jobs_q["job_name"] }} - {{ jobs_q["creation_time"] }}</p>
+            {% endfor %}
+        {% endif %}
+
+        {% if jobs["error"] is defined and jobs["error"] | length > 0 %}
+            <h3>Error:</h3>
+            {% for jobs_e in jobs["error"] %}
+                <p>{{ jobs_e["job_name"] }} - {{ jobs_e["creation_time"] }}</p>
+            {% endfor %}
+        {% endif %}
+
+    {% endif %}
+    <script src="/static/js/upload.js"></script>
+{% endblock %}
