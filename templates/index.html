@@ -5,20 +5,31 @@
 {% endblock %}
 
 {% block content %}
-    <p>Lorem ipsum: Peptide ion mobility adds an extra dimension of separation to mass spectrometry-based proteomics. The ability to accurately predict peptide ion mobility would be useful to expedite assay development and to discriminate true answers in database search. There are methods to accurately predict peptide ion mobility through drift tube devices, but methods to predict mobility through high-field asymmetric waveform ion mobility (FAIMS) are underexplored. Here, we successfully model peptide ions’ FAIMS mobility using a multi-label multi-output classification scheme to account for non-normal transmission distributions. We trained two models from over 100,000 human peptide precursors: a random forest and a long-term short-term memory (LSTM) neural network. Both models had different strengths, and the ensemble average of model predictions produced higher F2 score than either model alone. Finally, we explore cases where the models make mistakes, and demonstrate predictive performance of F2=0.66 (AUROC=0.928) on a new test dataset of nearly 40,000 different E. coli peptide ions.</p>
 
+    <h4>Deep Learning Predicts Peptide Transmission Profiles through FAIMS Directly from Sequence</h4>
+    <p>This page allows you to submit a list of peptides and obtain predictions for its peptide transmission profile, as
+    described in the related publication. You can submit the list either via a file upload or by entering them in the
+    textbox below. The peptide list should be delimited by newlines, commas, or spaces.</p>
+    <p>Once submitted, the data will be parsed by the server and passed through the model; large submissions may take a
+    few minutes to process. Model results will be made available for download near the bottom of the page. The results
+    consist of two files: <i>predictions.npy</i> and <i>prediction_labels.txt</i>. The <i>prediction_labels.txt</i>
+    contains the predictions for each submitted peptide, ordered by strongest to weakest prediction above the cutoff.
+    The <i>predictions.npy</i> file is a numpy array file that contains the predictions of the model for each of the 16
+    labels; the file is made available for those who wish to apply their own post-processing.</p>
 
-    <label for="btn_upload">Upload list of proteins:</label>
+    <label for="btn_upload">Upload list of peptides:</label>
     <input id="file_peptides" type="file">
 
     <form id="submission_form" method="POST" enctype="multipart/form-data">
         <label for="job_name">Name for the job:</label>
-        <input id="job_name" name="job_name" placeholder="Name to use for later reference."
+        <input id="job_name" name="job_name" placeholder="Name to use for later reference.">
         <label for="peptides">List of peptides:</label>
-        <textarea name="peptides" id="peptides" placeholder="Newline-separated list of proteins"></textarea>
+        <textarea name="peptides" id="peptides" placeholder="Newline-separated list of peptides"></textarea>
         <input id="btn_submit" type="submit" value="Submit">
     </form>
-
+    <p>NOTE: The site uses the session cookie to link you to your results. If you clear your browser cookies, you
+    will lose access to the results. Results that are not accessed for more than 30 days will be deleted. In the event
+    that server storage must be freed, the oldest results will be deleted.</p>
     {% if jobs is defined %}
         {%  if jobs["completed"] is defined %}
             <h3>Completed jobs:</h3>
