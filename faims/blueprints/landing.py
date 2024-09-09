@@ -4,7 +4,8 @@ from faims.db import get_db, get_unique_value_for_field
 import json
 from os.path import join
 import os
-from faims.analysis import get_peptide_max_length, faims_cv_prediction, get_prediction_label
+import pandas as pd
+from faims.analysis import get_peptide_max_length, faims_cv_prediction, get_prediction_label, create_barplot
 import numpy as np
 import zipfile
 import tempfile
@@ -71,19 +72,22 @@ def index():
 def download_file(id_peptides):
     if id_peptides in session["id_peptides"]:
         db = get_db()
-        descriptor = db.execute("SELECT r.id_result, q.job_name FROM results AS r INNER JOIN queue AS q ON r.id_peptides = q.id_peptides WHERE r.id_peptides = ?", (id_peptides,)).fetchone()
+        descriptor = db.execute("SELECT r.id_result, r.has_barplot, q.job_name FROM results AS r INNER JOIN queue AS q ON r.id_peptides = q.id_peptides WHERE r.id_peptides = ?", (id_peptides,)).fetchone()
         id_result = descriptor["id_result"]
         job_name = descriptor["job_name"]
 
 
         out_prefix = join(current_app.config["RESULTS_DIRECTORY"], id_result)
-        pred_file = out_prefix + "_predictions.npy"
+        pred_file = out_prefix + "_predictions.csv"
         pred_labels_file = out_prefix + "_prediction_labels"
 
         tmp_name = tempfile.mkstemp(suffix=".zip")[-1]
         z = zipfile.ZipFile(tmp_name, "w", compression=zipfile.ZIP_STORED)
-        z.write(pred_file, arcname="predictions.npy")
+        z.write(pred_file, arcname="predictions.csv")
         z.write(pred_labels_file, arcname="prediction_labels.txt")
+        if descriptor["has_barplot"] == 1:
+            barplot_filename = out_prefix + "_barplot.png"
+            z.write(barplot_filename, arcname="predictions_barplot.png")
         z.close()
 
         @after_this_request
@@ -117,13 +121,31 @@ def save_results(id_peptides, predictions, prediction_labels) -> str:
     while os.path.exists(out_prefix + "_predictions"):
         id_result = get_unique_value_for_field(db, field="id_result", table="results")
         out_prefix = join(current_app.config["RESULTS_DIRECTORY"], id_result)
-    pred_file = out_prefix + "_predictions.npy"
+    # pred_file = out_prefix + "_predictions.npy"
+    pred_file = out_prefix + "_predictions.csv"
     pred_labels_file = out_prefix + "_prediction_labels"
-    np.save(pred_file, predictions)
-    f = open(pred_labels_file, "w")
-    for label in prediction_labels:
-        f.write(f"{label}\n")
+    from faims.analysis import model_labels
+    f = open(join(current_app.config["UPLOAD_DIRECTORY"], id_peptides), "r")
+    peptides = f.read().splitlines()
     f.close()
+
+    prediction_df = pd.DataFrame(predictions, index=peptides, columns=[model_labels])
+    prediction_df.to_csv(pred_file)
+    # np.save(pred_file, predictions)
+    f = open(pred_labels_file, "w")
+    for pep, label in zip(peptides, prediction_labels):
+        if len(label) == 0:
+            print_label = "None"
+        else:
+            print_label = ", ".join(label)
+        f.write(f"{pep}: {print_label}\n")
+    f.close()
+
+    # Create plot
+    has_barplot = 0
+    if prediction_df.shape[0] <= current_app.config["PLOT_LIMIT"]:
+        create_barplot(peptides=peptides, predictions=predictions, savepath=out_prefix + "_barplot.png")
+        has_barplot = 1
     ## Zip the two files together (makes the total size larger, so meh)
     # z = zipfile.ZipFile(out_prefix + ".zip", "w")
     # z.write(pred_file)
@@ -131,7 +153,7 @@ def save_results(id_peptides, predictions, prediction_labels) -> str:
     # z.close()
 
     # Log into db
-    db.execute("INSERT INTO results (id_result, id_peptides) VALUES (?,?)", (id_result, id_peptides))
+    db.execute("INSERT INTO results (id_result, id_peptides, has_barplot) VALUES (?,?, ?)", (id_result, id_peptides, has_barplot))
     db.execute("UPDATE queue SET status = ? WHERE id_peptides = ?", ("completed", id_peptides))
     db.commit()
 

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block header %}
+    {% block title %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+    <p>The site serves as an interface for researchers to use the FAIMS CV model. Any difficulties should be reported to <a href="mailto:faims@xods.org">faims@xods.org</a>.</p>
+    <p>A link to the preprint/publication will be made available shortly.</p>
+    <b>Authors: </b>Justin McKetney, Ian J. Miller, Alexandre Hutton, Pavel Sinitcyn, Joshua J. Coon, Jesse G. Meyer.
+
+    <h4>Deep Learning Predicts Peptide Transmission Profiles through FAIMS Directly from Sequence</h4>
+    <p><b>Abstract.</b> Peptide ion mobility adds an extra dimension of separation to mass spectrometry-based proteomics. The ability to accurately predict peptide ion mobility would be useful to expedite assay development and to discriminate true answers in database search. There are methods to accurately predict peptide ion mobility through drift tube devices, but methods to predict mobility through high-field asymmetric waveform ion mobility (FAIMS) are underexplored. Here, we successfully model peptide ions’ FAIMS mobility using a multi-label multi-output classification scheme to account for non-normal transmission distributions. We trained two models from over 100,000 human peptide precursors: a random forest and a long-term short-term memory (LSTM) neural network. Both models had different strengths, and the ensemble average of model predictions produced higher F2 score than either model alone. Finally, we explore cases where the models make mistakes, and demonstrate predictive performance of F2=0.66 (AUROC=0.928) on a new test dataset of nearly 40,000 different E. coli peptide ions.</p>
+{% endblock %}
