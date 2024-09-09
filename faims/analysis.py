@@ -7,8 +7,10 @@ from numpy import mean
 from numpy import std
 from tensorflow.keras.metrics import binary_accuracy
 from sklearn.metrics import roc_auc_score, fbeta_score, recall_score, precision_score, accuracy_score
+from matplotlib import pyplot as plt
+
 char_index = {'2': 0, '3': 1, 'F': 2, 'a': 3, 'E': 4, 'T': 5, 'M': 6, '5': 7, 'm': 8, 'R': 9, 'END': 10, 'V': 11, 'A': 12, 'K': 13, 'I': 14, 'G': 15, 'W': 16, 'P': 17, 'Q': 18, 'D': 19, '4': 20, 'C': 21, 'N': 22, 'L': 23, 'S': 24, 'Y': 25, 'H': 26}
-model_labels = ['X20', 'X25', 'X30', 'X35', 'X40', 'X45', 'X50', 'X55', 'X60', 'X65', 'X70', 'X75', 'X80', 'X85', 'X90', 'X95']
+model_labels = ['20', '25', '30', '35', '40', '45', '50', '55', '60', '65', '70', '75', '80', '85', '90', '95']
 
 
 def fbeta2(y_true, y_pred, threshold_shift=0):
@@ -86,3 +88,36 @@ def get_prediction_label(predictions: np.array,
         labels = [model_labels[i] for i in gt_idx[sorted_gt_idx]]
         pred_labels.append(labels)
     return pred_labels
+
+
+def create_barplot(peptides: list[str],
+                   predictions: list[float],
+                   savepath: str):
+    """
+    Creates a barplot with the supplied predictions; different peptides are color-coded.
+    Parameters
+    ----------
+    peptides : list[str]
+        List of str representing paptides.
+    predictions : list[float]
+        List of the predictions for each peptide for the different CV values.
+    savepath : str
+        Where to save the plot.
+
+    Returns
+    -------
+
+    """
+    fig, ax = plt.subplots()
+    for i in range(len(peptides)):
+        width = 1/(1.5*len(peptides))
+        x_pos = np.arange(predictions.shape[1]) - 1/len(peptides) + (i+0.5)*width
+        ax.bar(x_pos, predictions[i,:], width=width)
+    ax.set_xlabel("FAIMS CV")
+    ax.set_ylabel("Model prediction")
+    ax.set_xticks(np.arange(len(model_labels)))
+    ax.set_xticklabels(model_labels)
+    ax.set_title("Distribution of predictions for input peptides")
+    ax.legend(peptides, loc='center left', bbox_to_anchor=(1, 0.5))
+    fig.savefig(savepath, bbox_inches='tight')
+    return

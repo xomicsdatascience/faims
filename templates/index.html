@@ -2,6 +2,7 @@
 
 {% block header %}
     {% block title %}{% endblock %}
+    <script src="/static/js/index.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -9,7 +10,10 @@
     <h4>Deep Learning Predicts Peptide Transmission Profiles through FAIMS Directly from Sequence</h4>
     <p>This page allows you to submit a list of peptides and obtain predictions for its peptide transmission profile, as
     described in the related publication. You can submit the list either via a file upload or by entering them in the
-    textbox below. The peptide list should be delimited by newlines, commas, or spaces.</p>
+    textbox below. The peptide list should be delimited by newlines, commas, or spaces. The format for each entry should
+        follow: <b>#AAAAA</b>, where "#" indicates the charge of the peptide, and the following characters represent the
+        amino acids. Lowercase "m" can be used to indicate oxidized methionine.</p>
+    <button onclick="populate_example('peptides');">Generate example input</button>
     <p>Once submitted, the data will be parsed by the server and passed through the model; large submissions may take a
     few minutes to process. Model results will be made available for download near the bottom of the page. The results
     consist of two files: <i>predictions.npy</i> and <i>prediction_labels.txt</i>. The <i>prediction_labels.txt</i>

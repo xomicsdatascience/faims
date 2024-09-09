@@ -10,6 +10,7 @@ CREATE TABLE queue (
 CREATE TABLE results (
     id_result TEXT UNIQUE NOT NULL PRIMARY KEY,
     id_peptides TEXT NOT NULL,
+    has_barplot BIT DEFAULT 0,
     creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_peptides) REFERENCES queue(id_peptides)
 );
