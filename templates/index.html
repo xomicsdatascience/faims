@@ -39,7 +39,10 @@
             <h3>Completed jobs:</h3>
             {% for jobs_c in jobs["completed"] %}
                 <p>{{ jobs_c["job_name"] }} - {{ jobs_c["creation_time"] }} - <a href="/results/{{ jobs_c['id_peptides'] }}">Download</a></p>
-
+                {% if jobs_c["has_barplot"] %}
+                    <p><img src="/file/{{ jobs_c['barplot'] }}"></p>
+                {% endif %}
+                <hr>
             {% endfor %}
         {% endif %}
         {% if jobs["running"] is defined and jobs["running"] | length > 0%}

@@ -1,4 +1,4 @@
-__version__ = "0.2.0"
+__version__ = "0.4.0"
 
 from flask import Flask
 import os
@@ -6,6 +6,18 @@ from os.path import join, dirname, basename
 import shutil
 import json
 
+def copy_tree(src, dst):
+    for dirpath, dirnames, filenames in os.walk(src):
+        subdir = dirpath[len(src)+1:]
+        print(src)
+        print(dirpath)
+        print(filenames)
+        for fname in filenames:
+            shutil.copy2(join(dirpath, fname), join(dst, subdir, fname))
+        for dname in dirnames:
+            if not os.path.exists(join(dst, subdir, dname)):
+                os.mkdir(join(dst, subdir, dname))
+    return
 
 def create_app(test_config=None) -> Flask:
     """Creates the app and returns it."""
@@ -18,10 +30,24 @@ def create_app(test_config=None) -> Flask:
     this_dir = dirname(dirname(__file__))
     template_source = join(this_dir, "templates")
     static_source = join(this_dir, "static")
+    # print(f"Copying from {template_source} into {template_directory}")
+    # shutil.copytree(template_source, template_directory, dirs_exist_ok=True)
+    # print(f"Copying from {static_source} into {static_directory}")
+    # shutil.copytree(static_source, static_directory, dirs_exist_ok=True)
     print(f"Copying from {template_source} into {template_directory}")
-    shutil.copytree(template_source, template_directory, dirs_exist_ok=True)
+    copy_tree(template_source, template_directory)
+    #    shutil.copytree(template_source, template_directory, dirs_exist_ok=True)
+
     print(f"Copying from {static_source} into {static_directory}")
-    shutil.copytree(static_source, static_directory, dirs_exist_ok=True)
+    copy_tree(static_source, static_directory)
+    #    for dirpath, dirnames, filenames in os.walk(static_source):
+    #        subdir = dirpath[len(static_source):]
+    #        for fname in filenames:
+    #            os.copy2(join(dirpath, fname), join(static_directory, subdir, fname))
+    #        for dname in dirnames:
+    #            if not os.exists(join(static_directory, subdir, dname)):
+    #                os.mkdir(join(static_directory, subdir, dname))
+    #    shutil.copytree(static_source, static_directory, dirs_exist_ok=True)
 
     os.makedirs(join(instance_path, env_dict["UPLOAD_DIRECTORY"]), exist_ok=True)
     os.makedirs(join(instance_path, env_dict["RESULTS_DIRECTORY"]), exist_ok=True)

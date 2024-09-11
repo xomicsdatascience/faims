@@ -9,9 +9,9 @@ from tensorflow.keras.metrics import binary_accuracy
 from sklearn.metrics import roc_auc_score, fbeta_score, recall_score, precision_score, accuracy_score
 from matplotlib import pyplot as plt
 
-char_index = {'2': 0, '3': 1, 'F': 2, 'a': 3, 'E': 4, 'T': 5, 'M': 6, '5': 7, 'm': 8, 'R': 9, 'END': 10, 'V': 11, 'A': 12, 'K': 13, 'I': 14, 'G': 15, 'W': 16, 'P': 17, 'Q': 18, 'D': 19, '4': 20, 'C': 21, 'N': 22, 'L': 23, 'S': 24, 'Y': 25, 'H': 26}
+# char_index = {'2': 0, '3': 1, 'F': 2, 'a': 3, 'E': 4, 'T': 5, 'M': 6, '5': 7, 'm': 8, 'R': 9, 'END': 10, 'V': 11, 'A': 12, 'K': 13, 'I': 14, 'G': 15, 'W': 16, 'P': 17, 'Q': 18, 'D': 19, '4': 20, 'C': 21, 'N': 22, 'L': 23, 'S': 24, 'Y': 25, 'H': 26}
 model_labels = ['20', '25', '30', '35', '40', '45', '50', '55', '60', '65', '70', '75', '80', '85', '90', '95']
-
+char_index = {'4': 0, '2': 1, 'A': 2, 'W': 3, 'S': 4, 'a': 5, '3': 6, 'R': 7, 'P': 8, 'H': 9, 'M': 10, 'N': 11, 'V': 12, 'F': 13, 'G': 14, 'E': 15, 'END': 16, 'T': 17, 'D': 18, 'Q': 19, 'Y': 20, 'K': 21, 'C': 22, '5': 23, 'L': 24, 'm': 25, 'I': 26}
 
 def fbeta2(y_true, y_pred, threshold_shift=0):
     beta = 2
@@ -57,9 +57,10 @@ def get_peptide_max_length(peptide_list):
     return maxlen
 
 
-def convert_peptide_list(peptide_list):
+def convert_peptide_list(peptide_list, maxlen=None):
     """Converts a list of peptides into an array of integers."""
-    maxlen = get_peptide_max_length(peptide_list)
+    if maxlen is None:
+        maxlen = get_peptide_max_length(peptide_list)
     end_value = char_index["END"]
     peptide_array = np.ones((len(peptide_list), maxlen), dtype=np.int64)*end_value
     for pep_idx, peptide in enumerate(peptide_list):
@@ -72,7 +73,7 @@ def faims_cv_prediction(peptide_list,
                         model_path):
     model = keras.models.load_model(model_path,
                                     custom_objects={'f2': f2, 'fbeta2': fbeta2})
-    peptide_array = convert_peptide_list(peptide_list)
+    peptide_array = convert_peptide_list(peptide_list, maxlen=51)
     return model.predict(peptide_array)
 
 
@@ -90,8 +91,8 @@ def get_prediction_label(predictions: np.array,
     return pred_labels
 
 
-def create_barplot(peptides: list[str],
-                   predictions: list[float],
+def create_barplot(peptides: list,
+                   predictions: list,
                    savepath: str):
     """
     Creates a barplot with the supplied predictions; different peptides are color-coded.
@@ -110,9 +111,11 @@ def create_barplot(peptides: list[str],
     """
     fig, ax = plt.subplots()
     for i in range(len(peptides)):
-        width = 1/(1.5*len(peptides))
-        x_pos = np.arange(predictions.shape[1]) - 1/len(peptides) + (i+0.5)*width
-        ax.bar(x_pos, predictions[i,:], width=width)
+        width = 1/(len(peptides)+1)
+        total_width = width * len(peptides)
+        print(total_width/2)
+        x_pos = np.arange(predictions.shape[1]) - total_width/2 + (i+0.5)*width
+        ax.bar(x_pos, predictions[i,:], width=width, align='center')
     ax.set_xlabel("FAIMS CV")
     ax.set_ylabel("Model prediction")
     ax.set_xticks(np.arange(len(model_labels)))
