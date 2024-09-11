@@ -57,9 +57,10 @@ def get_peptide_max_length(peptide_list):
     return maxlen
 
 
-def convert_peptide_list(peptide_list):
+def convert_peptide_list(peptide_list, maxlen=None):
     """Converts a list of peptides into an array of integers."""
-    maxlen = get_peptide_max_length(peptide_list)
+    if maxlen is None:
+        maxlen = get_peptide_max_length(peptide_list)
     end_value = char_index["END"]
     peptide_array = np.ones((len(peptide_list), maxlen), dtype=np.int64)*end_value
     for pep_idx, peptide in enumerate(peptide_list):
@@ -90,8 +91,8 @@ def get_prediction_label(predictions: np.array,
     return pred_labels
 
 
-def create_barplot(peptides: list[str],
-                   predictions: list[float],
+def create_barplot(peptides: list,
+                   predictions: list,
                    savepath: str):
     """
     Creates a barplot with the supplied predictions; different peptides are color-coded.
@@ -110,9 +111,11 @@ def create_barplot(peptides: list[str],
     """
     fig, ax = plt.subplots()
     for i in range(len(peptides)):
-        width = 1/(1.5*len(peptides))
-        x_pos = np.arange(predictions.shape[1]) - 1/len(peptides) + (i+0.5)*width
-        ax.bar(x_pos, predictions[i,:], width=width)
+        width = 1/(len(peptides)+1)
+        total_width = width * len(peptides)
+        print(total_width/2)
+        x_pos = np.arange(predictions.shape[1]) - total_width/2 + (i+0.5)*width
+        ax.bar(x_pos, predictions[i,:], width=width, align='center')
     ax.set_xlabel("FAIMS CV")
     ax.set_ylabel("Model prediction")
     ax.set_xticks(np.arange(len(model_labels)))
