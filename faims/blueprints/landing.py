@@ -34,12 +34,13 @@ def index():
                     if j is not None:
                         jobs[stat].append(j)
 
-                j = db.execute("SELECT q.id_peptides, q.job_name, r.id_result, r.creation_time "
+                j = db.execute("SELECT q.id_peptides, q.job_name, r.id_result, r.creation_time, r.has_barplot "
                                                  "FROM queue AS q INNER JOIN results AS r ON q.id_peptides = r.id_peptides "
                                                  "WHERE q.status = ? AND q.id_peptides = ?", ("completed", id_peptides)).fetchone()
                 if j is None:
                     continue
                 j = dict(j)
+                j["barplot"] = j["id_result"] + "_barplot.png"
                 jobs["completed"].append(dict(j))
             jobs["completed"].sort(key=lambda x: x["creation_time"], reverse=True)
             return render_template("index.html", jobs=jobs, id_peptides=session["id_peptides"])
@@ -67,6 +68,11 @@ def index():
         #     return jsonify({"msg": msg})
         return redirect(url_for("landing.index"))
 
+
+@bp.route("/file/<path:filename>")
+def request_file(filename: str):
+    fname = secure_filename(filename)
+    return send_file(join(current_app.config["RESULTS_DIRECTORY"], fname))
 
 @bp.route("/results/<id_peptides>", methods=["GET"])
 def download_file(id_peptides):

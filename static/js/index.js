@@ -1,7 +1,7 @@
 const charge_list = ['2', '3', '4', '5'];
 const valid_char_list = ['F', 'a', 'E', 'T', 'M', 'm', 'R', 'V', 'A', 'K', 'I', 'G', 'W', 'P', 'Q', 'D', 'C', 'N', 'L', 'S', 'Y', 'H'];
-const min_length = 3;
-const max_length = 10;
+const min_length = 7;
+const max_length = 16;
 
 function populate_example(elId){
     const el = document.getElementById(elId);
